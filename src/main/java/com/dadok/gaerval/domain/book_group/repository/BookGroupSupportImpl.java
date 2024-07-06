@@ -27,6 +27,8 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -163,7 +165,13 @@ public class BookGroupSupportImpl implements BookGroupSupport {
 				bookGroup.hasJoinPasswd.as("hasJoinPasswd"),
 				bookGroup.isPublic.as("isPublic"),
 
-				groupMember.countDistinct().as("memberCount"),
+				// groupMember.countDistinct().as("memberCount"),
+				Expressions.as(
+					JPAExpressions.select(groupMember.countDistinct())
+						.from(groupMember)
+						.where(groupMember.bookGroup.id.eq(bookGroup.id)),
+					"memberCount"
+				),
 				groupComment.countDistinct().as("commentCount"),
 				Projections.constructor(BookGroupResponse.BookResponse.class,
 					book.id.as("bookId"),
